@@ -1,3 +1,18 @@
+<div align="center">
+
+# 💸 Payout-
+
+> High-reliability automated disbursement and batch settlement gateway engine built for marketplace platforms.
+
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Architecture](https://img.shields.io/badge/Architecture-Two--Phase%20Commit%20%7C%20Queued-2ea44f)](#)
+[![Go / Node](https://img.shields.io/badge/Runtime-Node.js%20%2F%20Go-blue)](#)
+[![Sponsor](https://img.shields.io/badge/Sponsor-DeborahPanzer-ea4aaa?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/DeborahPanzer)
+
+</div>
+
+---
+
 ## Payout Architecture
 
 The payout module handles the transfer of available funds from the platform balance to sellers, vendors, creators, or connected accounts.
@@ -633,3 +648,12 @@ Important payout scenarios to test:
 * Add payout analytics dashboard
 * Add automated reconciliation reports
 * Add risk scoring and fraud detection
+---
+
+## 💖 Sponsorship & Maintenance
+
+Building and testing automated banking payout tooling requires continuous integration testing against multiple mock banking gateways.
+
+If this codebase assists your fintech infrastructure:
+
+👉 **[Support ongoing open-source development via GitHub Sponsors](https://github.com/sponsors/DeborahPanzer)**
