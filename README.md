@@ -1,12 +1,12 @@
 <div align="center">
 
-# 💸 Payout-
+# 💸 payout-engine
 
 > High-reliability automated disbursement and batch settlement gateway engine built for marketplace platforms.
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Architecture](https://img.shields.io/badge/Architecture-Two--Phase%20Commit%20%7C%20Queued-2ea44f)](#)
-[![Go / Node](https://img.shields.io/badge/Runtime-Node.js%20%2F%20Go-blue)](#)
+[![Runtime](https://img.shields.io/badge/Runtime-Go-blue)](#)
 [![Sponsor](https://img.shields.io/badge/Sponsor-DeborahPanzer-ea4aaa?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/DeborahPanzer)
 
 </div>
@@ -85,7 +85,7 @@ Example endpoint:
 POST /api/payouts
 ```
 
-Example request:
+Example single payout request:
 
 ```json
 {
@@ -94,6 +94,26 @@ Example request:
   "currency": "USD",
   "method": "bank_transfer",
   "description": "Seller payout for July 2026"
+}
+```
+
+Example batch settlement & disbursement payload:
+
+```json
+{
+  "batchId": "batch_20261017_0091",
+  "currency": "USD",
+  "recipient": {
+    "merchantId": "acct_1M2N3P4Q5R6S7T",
+    "destinationType": "custom_connected_account",
+    "routingNumber": "110000000"
+  },
+  "settlement": {
+    "grossAmount": 450000,
+    "platformFee": 45000,
+    "netDisbursement": 405000
+  },
+  "idempotencyKey": "disb_idem_8f7b2c1e4a"
 }
 ```
 
@@ -287,25 +307,14 @@ RETURNED
 
 ## Payout Gateway Adapter
 
-Payout provider integrations should be isolated behind a common interface.
+Payout provider integrations should be isolated behind a common Go interface.
 
-```ts
-interface PayoutGateway {
-  createRecipient(
-    input: CreateRecipientInput
-  ): Promise<RecipientResult>;
-
-  createPayout(
-    input: CreatePayoutInput
-  ): Promise<PayoutResult>;
-
-  getPayoutStatus(
-    payoutId: string
-  ): Promise<PayoutStatus>;
-
-  cancelPayout(
-    payoutId: string
-  ): Promise<CancelPayoutResult>;
+```go
+type PayoutGateway interface {
+	CreateRecipient(input CreateRecipientInput) (RecipientResult, error)
+	CreatePayout(input CreatePayoutInput) (PayoutResult, error)
+	GetPayoutStatus(payoutId string) (PayoutStatus, error)
+	CancelPayout(payoutId string) (CancelPayoutResult, error)
 }
 ```
 
@@ -410,8 +419,11 @@ The user approving a payout should not be the same user who modified the payout 
 ## Suggested Payout Project Structure
 
 ```text
-checkout-demo/
-├── src/
+payout-engine/
+├── go.mod
+├── engine.go
+├── engine_test.go
+├── internal/
 │   ├── app/
 │   │   ├── payouts/
 │   │   ├── payout-history/
@@ -422,33 +434,23 @@ checkout-demo/
 │   │       ├── balances/
 │   │       └── webhooks/
 │   │           └── payouts/
-│   ├── components/
-│   │   ├── payout-form/
-│   │   ├── payout-summary/
-│   │   ├── payout-history/
-│   │   ├── balance-card/
-│   │   ├── recipient-form/
-│   │   └── payout-status/
 │   ├── services/
-│   │   ├── payout.service.ts
-│   │   ├── balance.service.ts
-│   │   ├── recipient.service.ts
-│   │   ├── compliance.service.ts
-│   │   └── reconciliation.service.ts
-│   ├── payouts/
-│   │   ├── payout-gateway.interface.ts
-│   │   ├── mock-payout.gateway.ts
-│   │   └── stripe-connect-payout.gateway.ts
+│   │   ├── payout.service.go
+│   │   ├── balance.service.go
+│   │   ├── recipient.service.go
+│   │   ├── compliance.service.go
+│   │   └── reconciliation.service.go
+│   ├── gateways/
+│   │   ├── payout-gateway.interface.go
+│   │   ├── mock-payout.gateway.go
+│   │   └── stripe-connect-payout.gateway.go
 │   ├── repositories/
-│   │   ├── payout.repository.ts
-│   │   ├── balance.repository.ts
-│   │   └── recipient.repository.ts
-│   ├── jobs/
-│   │   ├── automatic-payout.job.ts
-│   │   └── payout-reconciliation.job.ts
-│   ├── validators/
-│   ├── types/
-│   └── utils/
+│   │   ├── payout.repository.go
+│   │   ├── balance.repository.go
+│   │   └── recipient.repository.go
+│   └── jobs/
+│       ├── automatic-payout.job.go
+│       └── payout-reconciliation.job.go
 ```
 
 ## Example Payout Response
@@ -572,6 +574,15 @@ Recommended reconciliation checks:
 
 A scheduled reconciliation job should report mismatches without automatically modifying financial records unless the correction process is explicitly designed and audited.
 
+## Quick Start (Go Environment)
+
+Download module dependencies and run the test suite for `payout-engine`:
+
+```bash
+go mod tidy
+go test -v ./...
+```
+
 ## Payout Environment Variables
 
 Add payout configuration to the environment file:
@@ -648,6 +659,7 @@ Important payout scenarios to test:
 * Add payout analytics dashboard
 * Add automated reconciliation reports
 * Add risk scoring and fraud detection
+
 ---
 
 ## 💖 Sponsorship & Maintenance
